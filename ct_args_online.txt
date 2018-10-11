@@ -1,0 +1,13 @@
+## Referenced assemblies
+/r:MoodleTest\\bin\\Debug\\MoodleTest.exe
+
+## Implementation under test
+/iut:MoodleTest.Moodle.Create
+
+/r:MoodleModel\\bin\\Debug\\MoodleModel.dll
+
+
+
+/mp:MoodleModel
+
+
