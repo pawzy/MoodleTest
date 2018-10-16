@@ -57,7 +57,7 @@
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="NModel">
-      <HintPath>..\..\bin\NModel.dll</HintPath>
+      <HintPath>..\bin\NModel.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
