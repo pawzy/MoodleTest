@@ -23,7 +23,7 @@ type Contract() =
     // login & logout 
     static member val activeLoginRequests = Map<User,LoginStatus>.EmptyMap with get, set
     static member val usersLoggedIn : Set<User> = Set<User>.EmptySet with get,set
-    static member val activeLogoutRequest : Set<User> = Set<User>.EmptySet with get, set
+    static member val activeLogoutRequests : Set<User> = Set<User>.EmptySet with get, set
     // search
     static member val currentSearch = Map<SearchKey, SearchStatus>.EmptyMap with get, set
     static member val foundCourse = false with get, set
@@ -62,7 +62,7 @@ type Contract() =
 
     [<Action>]
     static member logoutstart (user : User) = 
-        Contract.activeLogoutRequest <- Contract.activeLogoutRequest.Add(user)
+        Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Add(user)
         Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
         Contract.view <- View.Dashboard
     static member logoutstartEnabled (user : User) = 
@@ -72,11 +72,11 @@ type Contract() =
 
     [<Action>]
     static member logoutFinish (user : User) =
-        Contract.activeLogoutRequest <- Contract.activeLogoutRequest.Remove(user)
+        Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Remove(user)
     static member logoutFinishEnabled (user : User) =
         Contract.view = View.Dashboard &&
         Contract.usersLoggedIn.Contains(user) = false &&
-        Contract.activeLogoutRequest.Contains(user)
+        Contract.activeLogoutRequests.Contains(user)
         
     [<Action>]
     static member searchStart (keyword : SearchKey) =
@@ -106,11 +106,11 @@ type Contract() =
     [<Action>]
     static member enrolStart (user : User, enrolmentKey : EnrolmentKey) = 
         Contract.view <- View.CourseEnrol
-        //if enrolmentKey = EnrolmentKey.Correct then 
-        //    Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Successful)
-        //else 
+        if enrolmentKey = EnrolmentKey.Correct then 
+            Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Successful)
+        else 
         //    Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Failed)
-        ()
+            Contract.activeEnrolRequests
     static member enrolStartEnabled (user : User) =
         Contract.usersLoggedIn.Contains(user) &&
         Contract.foundCourse = true &&
