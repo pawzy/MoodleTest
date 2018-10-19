@@ -30,6 +30,7 @@ type Contract() =
     // enrolment
     static member val activeEnrolRequests = Map<User, EnrolmentStatus>.EmptyMap with get, set
     static member val courseParticipants = Set<User>.EmptySet with get, set
+    static member val enrolStarted = false with get, set
 
     [<Action>]
     static member loginStart (user : User, password : Password) = 
@@ -39,9 +40,9 @@ type Contract() =
         else
             Contract.activeLoginRequests <- Contract.activeLoginRequests.Add (user,LoginStatus.Failure)
             //Contract.view <- View.Login
-    static member loginStartEnabled () =
+    static member loginStartEnabled (user : User) =
         Contract.view = View.Login && 
-        Contract.usersLoggedIn.IsEmpty 
+        Contract.usersLoggedIn.Contains(user) = false 
 
 
     [<Action>]
@@ -49,7 +50,7 @@ type Contract() =
         Contract.activeLoginRequests <- Contract.activeLoginRequests.RemoveKey(user)
 
         if loginStatus = LoginStatus.Success then 
-            Contract.usersLoggedIn <- Set<User> (user)
+            Contract.usersLoggedIn <- Contract.usersLoggedIn.Add(user)
         else 
             Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
             Contract.view <- View.Login
@@ -67,7 +68,8 @@ type Contract() =
         Contract.view <- View.Dashboard
     static member logoutstartEnabled (user : User) = 
         Contract.usersLoggedIn.Contains(user)  &&
-        Contract.currentSearch.Count = 0
+        Contract.currentSearch.Count = 0 &&
+        Contract.activeEnrolRequests.Count = 0
 
 
     [<Action>]
@@ -106,35 +108,44 @@ type Contract() =
     [<Action>]
     static member enrolStart (user : User, enrolmentKey : EnrolmentKey) = 
         Contract.view <- View.CourseEnrol
+        //Contract.enrolStarted <- true
         if enrolmentKey = EnrolmentKey.Correct then 
-            Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Successful)
+            Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Successful)
         else 
-        //    Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Failed)
-            Contract.activeEnrolRequests
+            Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Failed)
+        //()
+        
     static member enrolStartEnabled (user : User) =
         Contract.usersLoggedIn.Contains(user) &&
         Contract.foundCourse = true &&
-        Contract.view = View.CourseSearch &&
-        Contract.courseParticipants.Contains(user) = false
+        (Contract.view = View.CourseSearch || Contract.view = View.CourseEnrol) &&
+        Contract.courseParticipants.Contains(user) = false  &&
+        Contract.enrolStarted = false &&
+        Contract.activeEnrolRequests.ContainsKey(user) = false
+        
 
-    //[<Action>]
-    //static member enrolFinish (user : User, enrolmentStatus : EnrolmentStatus) =
-    //    Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Remove(Pair<User, EnrolmentStatus> (user, enrolmentStatus))
-    //    if enrolmentStatus = EnrolmentStatus.Successful then 
-    //        Contract.view <- View.CourseOverview 
-    //        Contract.courseParticipants <- Contract.courseParticipants.Add(user)
-    //    else 
-    //        Contract.view <- View.CourseEnrol
-    //        Contract.courseParticipants <- Contract.courseParticipants.Remove(user)
-    //static member enrolFinishEnabled (user : User, enrolmentStatus : EnrolmentStatus) = 
-    //    Contract.activeEnrolRequests.Contains(Pair<User, EnrolmentStatus> (user, enrolmentStatus)) &&
-    //    Contract.view = View.CourseEnrol
+    [<Action>]
+    static member enrolFinish (user : User, enrolmentStatus : EnrolmentStatus) =
+        Contract.activeEnrolRequests <- Contract.activeEnrolRequests.RemoveKey(user)
+        //Contract.enrolStarted <- false
+        if enrolmentStatus = EnrolmentStatus.Successful then 
+            Contract.view <- View.CourseOverview 
+            Contract.courseParticipants <- Contract.courseParticipants.Add(user)
+        else 
+            Contract.view <- View.CourseEnrol
+            Contract.courseParticipants <- Contract.courseParticipants.Remove(user)
+    static member enrolFinishEnabled (user : User, enrolmentStatus : EnrolmentStatus) = 
+        Contract.activeEnrolRequests.Contains(Pair<User, EnrolmentStatus> (user, enrolmentStatus)) &&
+        Contract.view = View.CourseEnrol 
+        //Contract.enrolStarted = true
+        
     
-    //[<Action>]
-    //static member quizStart (user : User) = 
-    //    ()
-    //static member quizStartEnabled (user : User) =
-    //    Contract.courseParticipants.Contains(user)
+    [<Action>]
+    static member quizStart (user : User) = 
+        ()
+    static member quizStartEnabled (user : User) =
+        Contract.courseParticipants.Contains(user) &&
+        Contract.view = View.CourseOverview
 
 
 type Factory() =
