@@ -21,7 +21,6 @@ type Stepper () =
             | "searchCourse" -> null
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
-            () 
-
+            moodle.Init ()
 
 

@@ -6,12 +6,11 @@ open NModel.Attributes
 open NModel.Execution
 open NModel
 
-type View = Login = 0 | DashboardAuthenicated = 1 | Dashboard = 2 | CourseSearch = 3 | CourseEnrol = 4 | CourseOverview = 5
+type View = Login = 0 | DashboardAuthenicated = 1 | Dashboard = 2 | CourseSearch = 3 | CourseEnrol = 4 | CourseOverview = 5 | Quiz = 6 | QuizResults = 7
 type User = Student = 0 
 type Password = Correct = 0 | Incorrect = 1
 type LoginStatus = Success = 0 | Failure = 1 
 type LogoutStatus = Success = 0 | Failure = 1
-type GuestSession = Active = 0 | Inactive = 1
 type SearchKey = ValidCourse = 0 | InvalidCourse = 1
 type SearchStatus = Found = 0 | Notfound = 1
 type EnrolmentKey = Correct = 0 | Incorrect = 1
@@ -31,82 +30,81 @@ type Contract() =
     static member val activeEnrolRequests = Map<User, EnrolmentStatus>.EmptyMap with get, set
     static member val courseParticipants = Set<User>.EmptySet with get, set
     static member val enrolStarted = false with get, set
+    // quiz
+    static member val quizStarted = false with get, set
 
     [<Action>]
-    static member loginStart (user : User, password : Password) = 
+    static member login_start (user : User, password : Password) = 
         Contract.view <- View.DashboardAuthenicated
         if password = Password.Correct then
             Contract.activeLoginRequests <- Contract.activeLoginRequests.Add (user,LoginStatus.Success)
         else
             Contract.activeLoginRequests <- Contract.activeLoginRequests.Add (user,LoginStatus.Failure)
             //Contract.view <- View.Login
-    static member loginStartEnabled (user : User) =
+    static member login_startEnabled (user : User) =
         Contract.view = View.Login && 
         Contract.usersLoggedIn.Contains(user) = false 
 
 
     [<Action>]
-    static member loginfinish(user : User, loginStatus : LoginStatus) = 
+    static member login_finish(user : User, loginStatus : LoginStatus) = 
         Contract.activeLoginRequests <- Contract.activeLoginRequests.RemoveKey(user)
 
         if loginStatus = LoginStatus.Success then 
             Contract.usersLoggedIn <- Contract.usersLoggedIn.Add(user)
         else 
-            Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
+            //Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
             Contract.view <- View.Login
-    static member loginfinishEnabled(user : User, loginStatus : LoginStatus) = 
+    static member login_finishEnabled(user : User, loginStatus : LoginStatus) = 
         Contract.activeLoginRequests.Contains(Pair<User, LoginStatus> (user, loginStatus)) && 
         Contract.view = View.DashboardAuthenicated
-    
-    //static member Create()  =
-    //    LibraryModelProgram (typedefof<Contract>.Assembly, "MoodleModel")
 
     [<Action>]
-    static member logoutstart (user : User) = 
+    static member logout_start (user : User) = 
         Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Add(user)
         Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
         Contract.view <- View.Dashboard
-    static member logoutstartEnabled (user : User) = 
+    static member logout_startEnabled (user : User) = 
         Contract.usersLoggedIn.Contains(user)  &&
         Contract.currentSearch.Count = 0 &&
-        Contract.activeEnrolRequests.Count = 0
+        Contract.activeEnrolRequests.Count = 0 
 
 
     [<Action>]
-    static member logoutFinish (user : User) =
+    static member logout_finish (user : User) =
         Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Remove(user)
-    static member logoutFinishEnabled (user : User) =
+    static member logout_finishEnabled (user : User) =
         Contract.view = View.Dashboard &&
         Contract.usersLoggedIn.Contains(user) = false &&
         Contract.activeLogoutRequests.Contains(user)
         
     [<Action>]
-    static member searchStart (keyword : SearchKey) =
+    static member search_start (keyword : SearchKey) =
         Contract.view <- View.CourseSearch
         Contract.foundCourse <- false
         if keyword = SearchKey.ValidCourse then
             Contract.currentSearch <- Contract.currentSearch.Add(keyword, SearchStatus.Found)
         else 
             Contract.currentSearch <- Contract.currentSearch.Add(keyword, SearchStatus.Notfound)
-    static member searchStartEnabled ()  =
+    static member search_startEnabled ()  =
         Contract.usersLoggedIn.Count > 0 &&
         Contract.currentSearch.Count = 0 &&
         (Contract.view = View.DashboardAuthenicated ||
          Contract.view = View.CourseSearch)
     
     [<Action>]
-    static member searchFinish (keyword : SearchKey, status : SearchStatus) =
+    static member search_finish (keyword : SearchKey, status : SearchStatus) =
         Contract.currentSearch <- Contract.currentSearch.RemoveKey(keyword)
         if status = SearchStatus.Found then
             Contract.foundCourse <- true
         else 
             Contract.foundCourse <- false
-    static member searchFinishEnabled (keyword : SearchKey, status : SearchStatus) =
+    static member search_finishEnabled (keyword : SearchKey, status : SearchStatus) =
         Contract.currentSearch.Contains(Pair<SearchKey, SearchStatus> (keyword, status)) &&
         Contract.view = View.CourseSearch
 
     [<Action>]
-    static member enrolStart (user : User, enrolmentKey : EnrolmentKey) = 
+    static member enrol_start (user : User, enrolmentKey : EnrolmentKey) = 
         Contract.view <- View.CourseEnrol
         //Contract.enrolStarted <- true
         if enrolmentKey = EnrolmentKey.Correct then 
@@ -115,7 +113,7 @@ type Contract() =
             Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Failed)
         //()
         
-    static member enrolStartEnabled (user : User) =
+    static member enrol_startEnabled (user : User) =
         Contract.usersLoggedIn.Contains(user) &&
         Contract.foundCourse = true &&
         (Contract.view = View.CourseSearch || Contract.view = View.CourseEnrol) &&
@@ -125,27 +123,33 @@ type Contract() =
         
 
     [<Action>]
-    static member enrolFinish (user : User, enrolmentStatus : EnrolmentStatus) =
+    static member enrol_finish (user : User, enrolmentStatus : EnrolmentStatus) =
         Contract.activeEnrolRequests <- Contract.activeEnrolRequests.RemoveKey(user)
-        //Contract.enrolStarted <- false
         if enrolmentStatus = EnrolmentStatus.Successful then 
             Contract.view <- View.CourseOverview 
             Contract.courseParticipants <- Contract.courseParticipants.Add(user)
         else 
             Contract.view <- View.CourseEnrol
             Contract.courseParticipants <- Contract.courseParticipants.Remove(user)
-    static member enrolFinishEnabled (user : User, enrolmentStatus : EnrolmentStatus) = 
+    static member enrol_finishEnabled (user : User, enrolmentStatus : EnrolmentStatus) = 
         Contract.activeEnrolRequests.Contains(Pair<User, EnrolmentStatus> (user, enrolmentStatus)) &&
         Contract.view = View.CourseEnrol 
-        //Contract.enrolStarted = true
         
-    
     [<Action>]
-    static member quizStart (user : User) = 
-        ()
-    static member quizStartEnabled (user : User) =
+    static member quiz_start (user : User) = 
+        Contract.view <- View.Quiz
+        Contract.quizStarted <- true
+    static member quiz_startEnabled (user : User) =
         Contract.courseParticipants.Contains(user) &&
-        Contract.view = View.CourseOverview
+        Contract.view = View.CourseOverview &&
+        Contract.quizStarted = false
+    [<Action>]
+    static member quiz_finish () = 
+        Contract.view <- View.QuizResults
+        Contract.quizStarted <- false
+    static member quiz_finishEnabled () =
+        Contract.view = View.Quiz &&
+        Contract.quizStarted = true
 
 
 type Factory() =
