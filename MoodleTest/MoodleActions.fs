@@ -8,7 +8,7 @@ open NModel
 open NModel.Conformance
 open NModel.Terms
 
-
+open MoodleModel
 
 
 type Moodle () =
@@ -54,17 +54,15 @@ type Moodle () =
 
         let visibleElementWhenLoginSuccess = Moodle.driver.FindElementById(MOODLE_ID.Item("itemVisibleWhenLoginSuccess"))
 
-        //if visibleElementWhenLoginSuccess.Displayed then
-        //    Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
-        //else 
-        //    Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
-            
-
+        if visibleElementWhenLoginSuccess.Displayed then
+            Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
+        else 
+            Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
         
         //Moodle.driver.FindElementById("username").SendKeys("tudeng")
         //Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
         //Moodle.driver.FindElementById("loginbtn").Submit()
-        t
+        
 
     member this.GuestLogin () = 
         Moodle.driver.FindElementByLinkText("Log in").Click()
