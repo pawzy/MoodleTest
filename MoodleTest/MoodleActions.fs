@@ -10,11 +10,17 @@ open NModel.Terms
 
 
 
+
 type Moodle () =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
-    let MOODLE_USERNAME = "tudeng1"
+    let MOODLE_USERNAME = "tudeng"
     let MOODLE_PASSWORD_CORRECT = "AjutineParool1#"
-    let MOODLE_PASSWORD_INCORRECT = "pw"
+    let MOODLE_PASSWORD_INCORRECT = "ValeParool1#"
+    //let MOODLE_PASSWORD_INCORRECT = "pw"
+    let MOODLE_ID = Map.empty.Add("username", "username")
+                             .Add("password", "password")
+                             .Add("loginButton", "loginbtn")
+                             .Add("itemVisibleWhenLoginSuccess", "nav-notification-popover-container")
     let options = ChromeOptions()
     
     static member val driver = null with get, set
@@ -31,11 +37,34 @@ type Moodle () =
     member this.OpenMoodle () =
         Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
         
-    member this.CorrectLogin () = 
-        Moodle.driver.FindElementByLinkText("Log in").Click()
-        Moodle.driver.FindElementById("username").SendKeys("tudeng")
-        Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
-        Moodle.driver.FindElementById("loginbtn").Submit()
+    member this.Login (t:CompoundTerm) = 
+        let usernameField = Moodle.driver.FindElementById(MOODLE_ID.Item("username"))
+        let passwordField = Moodle.driver.FindElementById(MOODLE_ID.Item("password"))
+        let loginButton = Moodle.driver.FindElementById(MOODLE_ID.Item("loginButton"))
+
+        //Moodle.driver.FindElementByLinkText("Log in").Click()
+        usernameField.SendKeys(MOODLE_USERNAME)
+
+        if (string((t).[1]) = "Password(\"Correct\")") then 
+            passwordField.SendKeys(MOODLE_PASSWORD_CORRECT)
+        else 
+            passwordField.SendKeys(MOODLE_PASSWORD_INCORRECT)        
+        
+        loginButton.Submit()
+
+        let visibleElementWhenLoginSuccess = Moodle.driver.FindElementById(MOODLE_ID.Item("itemVisibleWhenLoginSuccess"))
+
+        //if visibleElementWhenLoginSuccess.Displayed then
+        //    Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
+        //else 
+        //    Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
+            
+
+        
+        //Moodle.driver.FindElementById("username").SendKeys("tudeng")
+        //Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
+        //Moodle.driver.FindElementById("loginbtn").Submit()
+        t
 
     member this.GuestLogin () = 
         Moodle.driver.FindElementByLinkText("Log in").Click()
