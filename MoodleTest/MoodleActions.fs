@@ -21,6 +21,8 @@ type Moodle () =
                              .Add("password", "password")
                              .Add("loginButton", "loginbtn")
                              .Add("itemVisibleWhenLoginSuccess", "nav-notification-popover-container")
+                             .Add("searchBoxId", "coursesearchbox")
+                             .Add("searchBoxIdDashboard", "search-box")
     let options = ChromeOptions()
     
     static member val driver = null with get, set
@@ -41,8 +43,7 @@ type Moodle () =
         let usernameField = Moodle.driver.FindElementById(MOODLE_ID.Item("username"))
         let passwordField = Moodle.driver.FindElementById(MOODLE_ID.Item("password"))
         let loginButton = Moodle.driver.FindElementById(MOODLE_ID.Item("loginButton"))
-
-        //Moodle.driver.FindElementByLinkText("Log in").Click()
+   
         usernameField.SendKeys(MOODLE_USERNAME)
 
         if (string((t).[1]) = "Password(\"Correct\")") then 
@@ -63,10 +64,6 @@ type Moodle () =
         //Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
         //Moodle.driver.FindElementById("loginbtn").Submit()
         
-
-    member this.GuestLogin () = 
-        Moodle.driver.FindElementByLinkText("Log in").Click()
-        Moodle.driver.FindElementById("guestlogin").Click()
 
     member this.Search() = 
         let searchBox = Moodle.driver.FindElementById("searchform_search")
