@@ -16,9 +16,9 @@ type Stepper () =
         member this.DoAction (t : CompoundTerm) = 
             match t.FunctionSymbol.ToString() with
             | "login_start" -> moodle.Login (t)
-            | "incorrectLogin" -> null
+            | "logout_start" -> moodle.Logout (t)
             | "guestLogin" -> null
-            | "searchCourse" -> null
+            | "search_start" -> moodle.Search ()
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
             System.Threading.Thread.Sleep(2000)

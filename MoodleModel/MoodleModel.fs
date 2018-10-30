@@ -59,6 +59,15 @@ type Contract() =
         Contract.activeLoginRequests.Contains(Pair<User, LoginStatus> (user, loginStatus)) && 
         Contract.view = View.DashboardAuthenicated
 
+    
+    //static member logout (user: User) = 
+    //    //()
+    //    Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
+    //    Contract.view <- View.Dashboard
+    //static member logoutEnabled (user: User) =
+    //    Contract.usersLoggedIn.Contains(user) && 
+    //    Contract.currentSearch.Count = 0 &&
+    //    Contract.activeEnrolRequests.Count = 0
     [<Action>]
     static member logout_start (user : User) = 
         Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Add(user)
@@ -78,6 +87,7 @@ type Contract() =
         Contract.usersLoggedIn.Contains(user) = false &&
         Contract.activeLogoutRequests.Contains(user)
         
+
     [<Action>]
     static member search_start (keyword : SearchKey) =
         Contract.view <- View.CourseSearch

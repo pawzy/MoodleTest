@@ -13,16 +13,24 @@ open MoodleModel
 
 type Moodle () =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
+    let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
     let MOODLE_USERNAME = "tudeng"
     let MOODLE_PASSWORD_CORRECT = "AjutineParool1#"
     let MOODLE_PASSWORD_INCORRECT = "ValeParool1#"
+    let MOODLE_SEARCH_VALID = "Testkursus 1"
+    let MOODLE_SEARCH_INVALID = "Invalid"
+
     //let MOODLE_PASSWORD_INCORRECT = "pw"
-    let MOODLE_ID = Map.empty.Add("username", "username")
-                             .Add("password", "password")
-                             .Add("loginButton", "loginbtn")
-                             .Add("itemVisibleWhenLoginSuccess", "nav-notification-popover-container")
-                             .Add("searchBoxId", "coursesearchbox")
-                             .Add("searchBoxIdDashboard", "search-box")
+    let username = "username"
+    let password = "password"
+    let loginButton = "loginbtn"
+    let itemVisibleWhenLoginSuccess = "nav-notification-popover-container"
+    let searchBoxMain = "coursesearchbox"
+    let searchBoxDashboard = "search-box"
+    let settingsDropdown = "dropdown-1"
+    let logoutButton = "actionmenuaction-5"
+
+
     let options = ChromeOptions()
     
     static member val driver = null with get, set
@@ -35,14 +43,17 @@ type Moodle () =
         options.AddAdditionalCapability("name", "katsetus", true);
         Moodle.driver <- new ChromeDriver(options)
         this.OpenMoodle() 
+    
+    member this.SetXDebugcookie () = 
+        Moodle.driver.Navigate().GoToUrl(COOKIE_SITE)
 
     member this.OpenMoodle () =
         Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
         
     member this.Login (t:CompoundTerm) = 
-        let usernameField = Moodle.driver.FindElementById(MOODLE_ID.Item("username"))
-        let passwordField = Moodle.driver.FindElementById(MOODLE_ID.Item("password"))
-        let loginButton = Moodle.driver.FindElementById(MOODLE_ID.Item("loginButton"))
+        let usernameField = Moodle.driver.FindElementById(username)
+        let passwordField = Moodle.driver.FindElementById(password)
+        let loginButton = Moodle.driver.FindElementById(loginButton)
    
         usernameField.SendKeys(MOODLE_USERNAME)
 
@@ -53,24 +64,34 @@ type Moodle () =
         
         loginButton.Submit()
 
-        let visibleElementWhenLoginSuccess = Moodle.driver.FindElementById(MOODLE_ID.Item("itemVisibleWhenLoginSuccess"))
+        let visibleElementWhenLoginSuccess = Moodle.driver.FindElementById(itemVisibleWhenLoginSuccess)
 
         if visibleElementWhenLoginSuccess.Displayed then
             Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
         else 
             Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
-        
-        //Moodle.driver.FindElementById("username").SendKeys("tudeng")
-        //Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
-        //Moodle.driver.FindElementById("loginbtn").Submit()
-        
 
-    member this.Search() = 
-        let searchBox = Moodle.driver.FindElementById("searchform_search")
-        searchBox.SendKeys("Testkursus")
+    member this.Search () = 
+        //let searchBox = null 
+        let searchBox = 
+            match Moodle.driver.Url.Contains("search.php") with
+            | true -> Moodle.driver.FindElementById(searchBoxMain)
+            | _ -> Moodle.driver.FindElementById(searchBoxDashboard)
+        //if Moodle.driver.Url.Contains("search.php") then
+        //    searchBox = Moodle.driver.FindElementById(searchBoxMain)
+        //else 
+        //    searchBox = Moodle.driver.FindElementById(searchBoxDashboard)
+        searchBox.SendKeys(MOODLE_SEARCH_VALID)
         searchBox.SendKeys(Keys.Enter)
+        ()
 
-
+    member this.Logout (t : CompoundTerm) =
+        let userDropdown = Moodle.driver.FindElementById(settingsDropdown)
+        
+        userDropdown.Click()
+        let logoutButton = Moodle.driver.FindElementById(logoutButton)
+        logoutButton.Click()
+        Action.Create("logout_finish", (t).[0]) :> CompoundTerm
 
 
 
