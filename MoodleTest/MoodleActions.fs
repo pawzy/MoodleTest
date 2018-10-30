@@ -18,6 +18,8 @@ type Moodle () =
     let MOODLE_PASSWORD_INCORRECT = "ValeParool1#"
     let MOODLE_SEARCH_VALID = "Testkursus 1"
     let MOODLE_SEARCH_INVALID = "Invalid"
+    let MOODLE_ENROLMENT_KEY_VALID = "TK1"
+    let MOODLE_ENROLMENT_KEY_INVALID = "Invalid"
 
     //let MOODLE_PASSWORD_INCORRECT = "pw"
     let username = "username"
@@ -30,7 +32,9 @@ type Moodle () =
     let logoutButton = "actionmenuaction-5"
     let enrolmentKey = "enrolpassword_4"
     let courseBox = "coursebox"
-
+    let selectCourse = "//div[contains(@class,'coursebox')]/div/h3/a"
+    let enrolButton = "id_submitbutton"
+    let courseHeader = "course-header"
 
     let options = ChromeOptions()
     
@@ -97,8 +101,6 @@ type Moodle () =
         else 
             Action.Create("search_finish", (t).[0], SearchStatus.Found) :> CompoundTerm
 
-        //t
-
     member this.Logout (t : CompoundTerm) =
         let userDropdown = Moodle.driver.FindElementById(settingsDropdown)
         
@@ -107,7 +109,39 @@ type Moodle () =
         logoutButton.Click()
         Action.Create("logout_finish", (t).[0]) :> CompoundTerm
 
+    member this.Enrol (t : CompoundTerm) = 
+        let course = Moodle.driver.FindElementByXPath(selectCourse)
+        course.Click()
+        let enrolmentKey = Moodle.driver.FindElementById(enrolmentKey)
+        if (string((t).[1]) = "EnrolmentKey(\"Correct\")") then
+            enrolmentKey.SendKeys(MOODLE_ENROLMENT_KEY_VALID)
+        else 
+            enrolmentKey.SendKeys(MOODLE_ENROLMENT_KEY_INVALID)
+        let enrolButton = Moodle.driver.FindElementById(enrolButton)
+        enrolButton.Submit()
 
+        let courseHeaderText = Moodle.driver.FindElementsById(courseHeader)
+        if courseHeaderText.Count > 0 then 
+            this.UnEnrol ()
+
+            Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Successful) :> CompoundTerm
+        else
+            //this.UnEnrol ()
+            
+            Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Failed) :> CompoundTerm
+           
+
+
+    member this.UnEnrol () = 
+        Moodle.driver.Navigate().GoToUrl("http://localhost:8081/moodle/course/view.php?id=2")
+        let dropdown = Moodle.driver.FindElementById("dropdown-2")
+        dropdown.Click()
+        let unenrolButton = Moodle.driver.FindElementById("action-menu-2-menu")
+        unenrolButton.Click()
+        let confirm = Moodle.driver.FindElementsByClassName("singlebutton").Item(0)
+        confirm.Click()
+
+        ()
 
 
 

@@ -17,7 +17,7 @@ type Stepper () =
             match t.FunctionSymbol.ToString() with
             | "login_start" -> moodle.Login (t)
             | "logout_start" -> moodle.Logout (t)
-            | "guestLogin" -> null
+            | "enrol_start" -> moodle.Enrol (t)
             | "search_start" -> moodle.Search (t)
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
