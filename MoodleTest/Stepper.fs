@@ -18,7 +18,7 @@ type Stepper () =
             | "login_start" -> moodle.Login (t)
             | "logout_start" -> moodle.Logout (t)
             | "guestLogin" -> null
-            | "search_start" -> moodle.Search ()
+            | "search_start" -> moodle.Search (t)
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
             System.Threading.Thread.Sleep(2000)

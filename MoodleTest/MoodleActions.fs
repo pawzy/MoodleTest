@@ -10,7 +10,6 @@ open NModel.Terms
 
 open MoodleModel
 
-
 type Moodle () =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
     let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
@@ -29,6 +28,8 @@ type Moodle () =
     let searchBoxDashboard = "search-box"
     let settingsDropdown = "dropdown-1"
     let logoutButton = "actionmenuaction-5"
+    let enrolmentKey = "enrolpassword_4"
+    let courseBox = "coursebox"
 
 
     let options = ChromeOptions()
@@ -63,27 +64,40 @@ type Moodle () =
             passwordField.SendKeys(MOODLE_PASSWORD_INCORRECT)        
         
         loginButton.Submit()
+        let visibleElementWhenLoginSuccess = Moodle.driver.FindElementsById(itemVisibleWhenLoginSuccess)
 
-        let visibleElementWhenLoginSuccess = Moodle.driver.FindElementById(itemVisibleWhenLoginSuccess)
-
-        if visibleElementWhenLoginSuccess.Displayed then
+        //let visibleElementWhenLoginSuccess = 
+        //    match Moodle.driver.FindElementById(itemVisibleWhenLoginSuccess) with 
+        //    | null -> false
+        //    | _ -> true
+            
+        if visibleElementWhenLoginSuccess.Count > 0 then
             Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
         else 
             Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
 
-    member this.Search () = 
+    member this.Search (t : CompoundTerm) = 
         //let searchBox = null 
         let searchBox = 
             match Moodle.driver.Url.Contains("search.php") with
             | true -> Moodle.driver.FindElementById(searchBoxMain)
             | _ -> Moodle.driver.FindElementById(searchBoxDashboard)
-        //if Moodle.driver.Url.Contains("search.php") then
-        //    searchBox = Moodle.driver.FindElementById(searchBoxMain)
-        //else 
-        //    searchBox = Moodle.driver.FindElementById(searchBoxDashboard)
-        searchBox.SendKeys(MOODLE_SEARCH_VALID)
+        
+        searchBox.Clear()
+        if (string((t).[0]) = "SearchKey(\"ValidCourse\")") then 
+            searchBox.SendKeys(MOODLE_SEARCH_VALID)
+        else 
+            searchBox.SendKeys(MOODLE_SEARCH_INVALID)
+        
         searchBox.SendKeys(Keys.Enter)
-        ()
+
+        let results = Moodle.driver.FindElementsByClassName(courseBox)
+        if results.Count = 0 then 
+            Action.Create("search_finish", (t).[0], SearchStatus.Notfound) :> CompoundTerm
+        else 
+            Action.Create("search_finish", (t).[0], SearchStatus.Found) :> CompoundTerm
+
+        //t
 
     member this.Logout (t : CompoundTerm) =
         let userDropdown = Moodle.driver.FindElementById(settingsDropdown)
