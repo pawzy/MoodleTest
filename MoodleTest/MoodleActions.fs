@@ -35,6 +35,11 @@ type Moodle () =
     let selectCourse = "//div[contains(@class,'coursebox')]/div/h3/a"
     let enrolButton = "id_submitbutton"
     let courseHeader = "course-header"
+    let courseActivity = "activity"
+    //let quizLink = "//li[@id='module-5']//div//div/a"
+    let quizLink = "activityinstance"
+    let quizButton = "quizstartbuttondiv"
+
 
     let options = ChromeOptions()
     
@@ -121,7 +126,8 @@ type Moodle () =
         enrolButton.Submit()
 
         let courseHeaderText = Moodle.driver.FindElementsById(courseHeader)
-        if courseHeaderText.Count > 0 then 
+        let visibleActivity = Moodle.driver.FindElementsByClassName(courseActivity)
+        if visibleActivity.Count > 0 then 
             this.UnEnrol ()
 
             Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Successful) :> CompoundTerm
@@ -130,7 +136,12 @@ type Moodle () =
             
             Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Failed) :> CompoundTerm
            
-
+    member this.Quiz (t : CompoundTerm) = 
+        let quizLink = Moodle.driver.FindElementByXPath("//div[@class='activityinstance']/a")
+        quizLink.Click() 
+        let quizButton = Moodle.driver.FindElementByClassName(quizButton)
+        quizButton.Click()
+        t
 
     member this.UnEnrol () = 
         Moodle.driver.Navigate().GoToUrl("http://localhost:8081/moodle/course/view.php?id=2")

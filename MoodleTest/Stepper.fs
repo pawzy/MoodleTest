@@ -19,6 +19,7 @@ type Stepper () =
             | "logout_start" -> moodle.Logout (t)
             | "enrol_start" -> moodle.Enrol (t)
             | "search_start" -> moodle.Search (t)
+            | "quiz_start" -> moodle.Quiz (t)
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
             System.Threading.Thread.Sleep(2000)
