@@ -1,25 +1,32 @@
 ﻿namespace MoodleTest
 
 open System
+open System.IO
 open OpenQA.Selenium
 open OpenQA.Selenium.Remote
 open OpenQA.Selenium.Chrome
+open OpenQA.Selenium.Interactions
 open NModel
 open NModel.Conformance
 open NModel.Terms
 
 open MoodleModel
+open OpenQA.Selenium.Internal
 
 type Moodle () =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
     let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
+    let COURSE_ADMIN_SITE = "http://localhost:8081/moodle/user/index.php?contextid=28&id=2&perpage=20"
     let MOODLE_USERNAME = "tudeng"
+    let MOODLE_USERNAME_ADMIN = "admin"
+    let MOODLE_PASSWORD_ADMIN = "05cT8eEe#"
     let MOODLE_PASSWORD_CORRECT = "AjutineParool1#"
     let MOODLE_PASSWORD_INCORRECT = "ValeParool1#"
     let MOODLE_SEARCH_VALID = "Testkursus 1"
     let MOODLE_SEARCH_INVALID = "Invalid"
     let MOODLE_ENROLMENT_KEY_VALID = "TK1"
     let MOODLE_ENROLMENT_KEY_INVALID = "Invalid"
+    let MOODLE_USER_FULLNAME = "Tudeng Tipikas"
 
     //let MOODLE_PASSWORD_INCORRECT = "pw"
     let username = "username"
@@ -34,7 +41,6 @@ type Moodle () =
     let courseBox = "coursebox"
     let selectCourse = "//div[contains(@class,'coursebox')]/div/h3/a"
     let enrolButton = "id_submitbutton"
-    let courseHeader = "course-header"
     let courseActivity = "activity"
     //let quizLink = "//li[@id='module-5']//div//div/a"
     let quizLink = "activityinstance"
@@ -42,6 +48,9 @@ type Moodle () =
 
 
     let options = ChromeOptions()
+
+    let log (text : string) =
+        System.Console.Error.WriteLine(text)
     
     static member val driver = null with get, set
 
@@ -52,6 +61,7 @@ type Moodle () =
         options.AddAdditionalCapability("secret", "secret", true);
         options.AddAdditionalCapability("name", "katsetus", true);
         Moodle.driver <- new ChromeDriver(options)
+        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(4.0)
         this.OpenMoodle() 
     
     member this.SetXDebugcookie () = 
@@ -74,11 +84,6 @@ type Moodle () =
         
         loginButton.Submit()
         let visibleElementWhenLoginSuccess = Moodle.driver.FindElementsById(itemVisibleWhenLoginSuccess)
-
-        //let visibleElementWhenLoginSuccess = 
-        //    match Moodle.driver.FindElementById(itemVisibleWhenLoginSuccess) with 
-        //    | null -> false
-        //    | _ -> true
             
         if visibleElementWhenLoginSuccess.Count > 0 then
             Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
@@ -86,7 +91,6 @@ type Moodle () =
             Action.Create("login_finish", (t).[0], LoginStatus.Failure) :> CompoundTerm
 
     member this.Search (t : CompoundTerm) = 
-        //let searchBox = null 
         let searchBox = 
             match Moodle.driver.Url.Contains("search.php") with
             | true -> Moodle.driver.FindElementById(searchBoxMain)
@@ -114,6 +118,12 @@ type Moodle () =
         logoutButton.Click()
         Action.Create("logout_finish", (t).[0]) :> CompoundTerm
 
+    member private this.LogoutHelper () =
+        let userDropdown = Moodle.driver.FindElementById(settingsDropdown)
+        userDropdown.Click()
+        let logoutButton = Moodle.driver.FindElementById(logoutButton)
+        logoutButton.Click()
+
     member this.Enrol (t : CompoundTerm) = 
         let course = Moodle.driver.FindElementByXPath(selectCourse)
         course.Click()
@@ -125,90 +135,64 @@ type Moodle () =
         let enrolButton = Moodle.driver.FindElementById(enrolButton)
         enrolButton.Submit()
 
-        let courseHeaderText = Moodle.driver.FindElementsById(courseHeader)
         let visibleActivity = Moodle.driver.FindElementsByClassName(courseActivity)
         if visibleActivity.Count > 0 then 
-            this.UnEnrol ()
-
             Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Successful) :> CompoundTerm
-        else
-            //this.UnEnrol ()
-            
+        else            
             Action.Create("enrol_finish", (t).[0], EnrolmentStatus.Failed) :> CompoundTerm
            
-    member this.Quiz (t : CompoundTerm) = 
+    member this.Quiz () =
         let quizLink = Moodle.driver.FindElementByXPath("//div[@class='activityinstance']/a")
         quizLink.Click() 
         let quizButton = Moodle.driver.FindElementByClassName(quizButton)
         quizButton.Click()
-        t
-
+        System.Threading.Thread.Sleep(1000)
+        let question1 = Moodle.driver.FindElementByXPath("//div[@id='q1']//input[@value='2']")
+        question1.Click()
+        System.Threading.Thread.Sleep(1000)
+        let question2 = Moodle.driver.FindElementByXPath("//div[@id='q2']//input[@value='2']")
+        question2.Click()
+        System.Threading.Thread.Sleep(1000)
+        let question3 = Moodle.driver.FindElementByXPath("//div[@id='q3']//input[@value='2']")
+        question3.Click()       
+        System.Threading.Thread.Sleep(1000)
+        let question4 = Moodle.driver.FindElementByXPath("//div[@id='q4']//input[@value='2']")
+        question4.Click()
+        System.Threading.Thread.Sleep(1000)
+        let question5 = Moodle.driver.FindElementByXPath("//div[@id='q5']//input[@value='2']")
+        question5.Click()
+        System.Threading.Thread.Sleep(1000)
+        let submitButton = Moodle.driver.FindElementByXPath("//div[@class='submitbtns']/input")
+        submitButton.Click()
+        let submitAll = Moodle.driver.FindElementByXPath("//div[@id='quiz-timer']/following::div//button")
+        submitAll.Click()
+        null
+        
+    member private this.LoginAsAdmin () = 
+        Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
+        let usernameField = Moodle.driver.FindElementById(username)
+        let passwordField = Moodle.driver.FindElementById(password)
+        let loginButton = Moodle.driver.FindElementById(loginButton)
+        usernameField.SendKeys(MOODLE_USERNAME_ADMIN)
+        passwordField.SendKeys(MOODLE_PASSWORD_ADMIN)
+        loginButton.Submit()
+    
     member this.UnEnrol () = 
-        Moodle.driver.Navigate().GoToUrl("http://localhost:8081/moodle/course/view.php?id=2")
-        let dropdown = Moodle.driver.FindElementById("dropdown-2")
-        dropdown.Click()
-        let unenrolButton = Moodle.driver.FindElementById("action-menu-2-menu")
-        unenrolButton.Click()
-        let confirm = Moodle.driver.FindElementsByClassName("singlebutton").Item(0)
-        confirm.Click()
+        let elementVisibleWhenUserLoggedIn = Moodle.driver.FindElementsById(itemVisibleWhenLoginSuccess)
+        if elementVisibleWhenUserLoggedIn.Count > 0 then
+            this.LogoutHelper ()
+
+        this.LoginAsAdmin ()
+        Moodle.driver.Navigate().GoToUrl(COURSE_ADMIN_SITE)
+        let unenrolUser = Moodle.driver.FindElementsByXPath("//div[@data-fullname='" + MOODLE_USER_FULLNAME + "']/a[@data-action='unenrol']")
+        if unenrolUser.Count > 0 then
+            unenrolUser.Item(0).Click()            
+            System.Threading.Thread.Sleep(2000)
+            let submit = Moodle.driver.FindElementByXPath("//div[@class='modal-content']/div[@class='modal-footer']/button[1]")
+            submit.Click()
+            System.Threading.Thread.Sleep(2000)
 
         ()
-
-
-
-
-    //static member public OpenBrowser () : ChromeDriver = 
-    //    ()
-   
-
-    
-    //static member public CorrectLogin (driver : ChromeDriver) =
-    //    if driver = null then null
-    //    else driver.Navigate().GoToUrl(MOODLE_SITe) driver
-            
-
-    //interface IStepper with 
-    //    member this.DoAction(t:CompoundTerm) = 
-    //        match t.FunctionSymbol.ToString() with 
-    //        | "initialize" -> 
-    //            Moodle.driver <- Moodle.OpenBrowser() 
-    //            //term v6imaldab tagasi saata andmeid mudelisse
-    //            null
-    //        | "login" -> 
-    //            Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
-    //            Moodle.driver.FindElementByLinkText("Log in").Click()
-    //            Moodle.driver.FindElementById("username").SendKeys("tudeng")
-    //            Moodle.driver.FindElementById("password").SendKeys("AjutineParool1#")
-    //            Moodle.driver.FindElementById("loginbtn").Submit()
-    //            //Moodle.Driver.FindElementById("x")
-           
-    //            null
-    //        | s -> failwith (sprintf "Tundmatu toiming %s" s)
-    //    member this.Reset() = 
-    //        Moodle.driver.Dispose()
-    //        Moodle.driver <- Moodle.OpenBrowser() 
-    //        ()
-    
-
-    //member this.CorrectLogin () =
-    //    Moodle.driver.Navigate.GoToUrl(Moodle_SITE)
-
-
-    //static member Create () = 
-    //    new Moodle() 
-
-
-        //let driver = Moodle.OpenBrowser
-
-
-
-        //driver.Navigate().GoToUrl("http://localhost:8081/moodle/")
-        //driver.FindElementByLinkText("Log in").Click()
-        //driver.FindElementById("username").SendKeys("tudeng")
-        //driver.FindElementById("password").SendKeys("AjutineParool1#")
-        //driver.FindElementById("loginbtn").Submit()
-
-        //driver
 
 
 
