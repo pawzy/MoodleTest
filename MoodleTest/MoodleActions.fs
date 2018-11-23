@@ -146,27 +146,29 @@ type Moodle () =
         quizLink.Click() 
         let quizButton = Moodle.driver.FindElementByClassName(quizButton)
         quizButton.Click()
-        System.Threading.Thread.Sleep(1000)
         let question1 = Moodle.driver.FindElementByXPath("//div[@id='q1']//input[@value='2']")
         question1.Click()
-        System.Threading.Thread.Sleep(1000)
         let question2 = Moodle.driver.FindElementByXPath("//div[@id='q2']//input[@value='2']")
         question2.Click()
-        System.Threading.Thread.Sleep(1000)
         let question3 = Moodle.driver.FindElementByXPath("//div[@id='q3']//input[@value='2']")
         question3.Click()       
-        System.Threading.Thread.Sleep(1000)
         let question4 = Moodle.driver.FindElementByXPath("//div[@id='q4']//input[@value='2']")
         question4.Click()
-        System.Threading.Thread.Sleep(1000)
         let question5 = Moodle.driver.FindElementByXPath("//div[@id='q5']//input[@value='2']")
         question5.Click()
         System.Threading.Thread.Sleep(1000)
-        let submitButton = Moodle.driver.FindElementByXPath("//div[@class='submitbtns']/input")
-        submitButton.Click()
+        let finishAttempt = Moodle.driver.FindElementByXPath("//div[@class='submitbtns']/input")
+        finishAttempt.Click()
+        System.Threading.Thread.Sleep(1000)
         let submitAll = Moodle.driver.FindElementByXPath("//div[@id='quiz-timer']/following::div//button")
         submitAll.Click()
-        null
+        System.Threading.Thread.Sleep(1000)
+        let confirmButton = Moodle.driver.FindElementByXPath("//div[contains(@class, 'confirmation-buttons')]/input[contains(@class,'btn-primary')]")
+        confirmButton.Click()
+        System.Threading.Thread.Sleep(1000)
+        Action.Create("quiz_finish") :> CompoundTerm
+
+        
         
     member private this.LoginAsAdmin () = 
         Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
