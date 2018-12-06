@@ -13,7 +13,7 @@ open NModel.Terms
 open MoodleModel
 open OpenQA.Selenium.Internal
 
-type Moodle () =
+type Moodle (?arg : String) =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
     let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
     let COURSE_ADMIN_SITE = "http://localhost:8081/moodle/user/index.php?contextid=28&id=2&perpage=20"
@@ -49,10 +49,24 @@ type Moodle () =
 
     let options = ChromeOptions()
 
+    let param_moodle_username = 
+        match arg with 
+            | None -> "tudeng"
+            | Some a -> a.ToLower() 
+
+    let param_fullname = 
+        match arg with 
+            | None -> "Tudeng Tipikas"
+            | Some a -> a + " " + a
+
     let log (text : string) =
         System.Console.Error.WriteLine(text)
     
     static member val driver = null with get, set
+    //static member val param_moodle_username = "tudeng" with get, set
+    //static member val param_fullname = "Tudeng Tipikas" with get, set
+
+
 
     member this.Init () =
         options.AddAdditionalCapability(CapabilityType.Version, "latest", true)
@@ -64,6 +78,11 @@ type Moodle () =
         Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(4.0)
         this.OpenMoodle() 
     
+    //member this.SetUsername(username : String) = 
+    //    Moodle.param_moodle_username <- username.ToLower()
+    //    Moodle.param_fullname <- username + " " + username
+    //    ()
+
     member this.SetXDebugcookie () = 
         Moodle.driver.Navigate().GoToUrl(COOKIE_SITE)
 
@@ -75,7 +94,7 @@ type Moodle () =
         let passwordField = Moodle.driver.FindElementById(password)
         let loginButton = Moodle.driver.FindElementById(loginButton)
    
-        usernameField.SendKeys(MOODLE_USERNAME)
+        usernameField.SendKeys(param_moodle_username)
 
         if (string((t).[1]) = "Password(\"Correct\")") then 
             passwordField.SendKeys(MOODLE_PASSWORD_CORRECT)
@@ -186,7 +205,7 @@ type Moodle () =
 
         this.LoginAsAdmin ()
         Moodle.driver.Navigate().GoToUrl(COURSE_ADMIN_SITE)
-        let unenrolUser = Moodle.driver.FindElementsByXPath("//div[@data-fullname='" + MOODLE_USER_FULLNAME + "']/a[@data-action='unenrol']")
+        let unenrolUser = Moodle.driver.FindElementsByXPath("//div[@data-fullname='" + param_fullname + "']/a[@data-action='unenrol']")
         if unenrolUser.Count > 0 then
             unenrolUser.Item(0).Click()            
             System.Threading.Thread.Sleep(2000)

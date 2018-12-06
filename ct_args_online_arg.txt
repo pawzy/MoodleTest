@@ -1,0 +1,14 @@
+## Referenced assemblies
+/r:MoodleTest\\bin\\Debug\\MoodleTest.exe
+
+## Implementation under test
+/iut:MoodleTest.Stepper.Create
+
+/r:MoodleModel\\bin\\Debug\\MoodleModel.dll
+/stepperArg:Cgldh
+
+
+
+/mp:MoodleModel
+
+

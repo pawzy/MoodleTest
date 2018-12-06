@@ -5,12 +5,24 @@ open NModel.Terms
 open System
 open System.IO
 
-type Stepper () = 
-    let moodle = new Moodle ()
+type Stepper (?arg : String) = 
+
+    let moodle = 
+        match arg with
+            | None -> new Moodle () 
+            | Some a -> new Moodle (a)
     do moodle.Init ()
+
 
     static member Create() = 
         new Stepper ()
+    
+    static member Create(arg) =
+        //System.Console.Out(arg)
+        System.Console.WriteLine(arg : String) |> ignore
+        new Stepper (arg)
+                
+    
 
     interface IStepper with 
         member this.DoAction (t : CompoundTerm) = 
