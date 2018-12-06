@@ -9,9 +9,9 @@ open OpenQA.Selenium.Interactions
 open NModel
 open NModel.Conformance
 open NModel.Terms
-
 open MoodleModel
 open OpenQA.Selenium.Internal
+//open OpenQA.Selenium.
 
 type Moodle (?arg : String) =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
@@ -56,11 +56,12 @@ type Moodle (?arg : String) =
 
     let param_fullname = 
         match arg with 
-            | None -> "Tudeng Tipikas"
+            | None -> "Tudeng Tudeng"
             | Some a -> a + " " + a
 
     let log (text : string) =
         System.Console.Error.WriteLine(text)
+     
     
     static member val driver = null with get, set
     //static member val param_moodle_username = "tudeng" with get, set
@@ -74,9 +75,17 @@ type Moodle (?arg : String) =
         options.AddAdditionalCapability("key", "key", true);
         options.AddAdditionalCapability("secret", "secret", true);
         options.AddAdditionalCapability("name", "katsetus", true);
+        options.AddArgument("headless")
+        options.AddArgument("disable-gpu")
+
         Moodle.driver <- new ChromeDriver(options)
-        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(4.0)
+        
+        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(3.0)
         this.OpenMoodle() 
+        if arg.IsSome then
+            if arg.ToString() = "Tudeng" then
+                this.SetXDebugcookie ()
+
     
     //member this.SetUsername(username : String) = 
     //    Moodle.param_moodle_username <- username.ToLower()

@@ -42,6 +42,14 @@
     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.FSharp.Targets</FSharpTargetsPath>
   </PropertyGroup>
   <Import Project="$(FSharpTargetsPath)" />
+  <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets'))" />
+    <Error Condition="!Exists('..\packages\Selenium.PhantomJS.WebDriver.2.1.1\build\Selenium.PhantomJS.WebDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.PhantomJS.WebDriver.2.1.1\build\Selenium.PhantomJS.WebDriver.targets'))" />
+  </Target>
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Library1.fs" />
@@ -49,6 +57,12 @@
     <Compile Include="Main.fs" />
     <Compile Include="MoodleActions.fs" />
     <Compile Include="Stepper.fs" />
+    <Content Include="phantomjs-license.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="phantomjs.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
@@ -68,21 +82,13 @@
     <Reference Include="WebDriver">
       <HintPath>..\packages\Selenium.WebDriver.3.141.0\lib\net45\WebDriver.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\MoodleModel\MoodleModel.fsproj">
       <Name>MoodleModel</Name>
       <Project>{0a8d27c1-d6a4-4dbb-8ba3-800b0886e061}</Project>
       <Private>True</Private>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets" Condition="Exists('..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Selenium.WebDriver.ChromeDriver.2.42.0.1\build\Selenium.WebDriver.ChromeDriver.targets'))" />
-  </Target>
+  <Import Project="..\packages\Selenium.PhantomJS.WebDriver.2.1.1\build\Selenium.PhantomJS.WebDriver.targets" Condition="Exists('..\packages\Selenium.PhantomJS.WebDriver.2.1.1\build\Selenium.PhantomJS.WebDriver.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
