@@ -1,0 +1,2 @@
+/r:MoodleModel\\bin\\Debug\\MoodleModel.dll MoodleModel.Factory.Create
+/file:testsuite.txt

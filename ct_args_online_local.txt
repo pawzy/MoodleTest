@@ -1,0 +1,15 @@
+## Referenced assemblies
+/r:MoodleTest\\bin\\Debug\\MoodleTest.exe
+
+## Implementation under test
+/iut:MoodleTest.Stepper.Create
+
+/r:MoodleModel\\bin\\Debug\\MoodleModel.dll
+
+/metrics:+
+/runs:10
+
+
+/mp:MoodleModel
+
+

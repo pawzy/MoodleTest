@@ -1,13 +1,14 @@
 ## Referenced assemblies
-/r:MoodleTest\\bin\\Debug\\MoodleTest.exe
+/r:MoodleTest/bin/Debug/MoodleTest.exe
+/r:MoodleModel/bin/Debug/MoodleModel.dll
 
 ## Implementation under test
 /iut:MoodleTest.Stepper.Create
 
-/r:MoodleModel\\bin\\Debug\\MoodleModel.dll
-/stepperArg:Cgldh
+/metrics:+
+/runs:20
 
-
+/stepperArg:Tudeng
 
 /mp:MoodleModel
 

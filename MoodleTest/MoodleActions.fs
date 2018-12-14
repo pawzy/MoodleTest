@@ -11,12 +11,11 @@ open NModel.Conformance
 open NModel.Terms
 open MoodleModel
 open OpenQA.Selenium.Internal
-//open OpenQA.Selenium.
 
 type Moodle (?arg : String) =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
     let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
-    let COURSE_ADMIN_SITE = "http://localhost:8081/moodle/user/index.php?contextid=28&id=2&perpage=20"
+    let COURSE_ADMIN_SITE = "http://localhost:8081/moodle/user/index.php?contextid=28&id=2&perpage=200"
     let MOODLE_USERNAME = "tudeng"
     let MOODLE_USERNAME_ADMIN = "admin"
     let MOODLE_PASSWORD_ADMIN = "05cT8eEe#"
@@ -28,7 +27,6 @@ type Moodle (?arg : String) =
     let MOODLE_ENROLMENT_KEY_INVALID = "Invalid"
     let MOODLE_USER_FULLNAME = "Tudeng Tipikas"
 
-    //let MOODLE_PASSWORD_INCORRECT = "pw"
     let username = "username"
     let password = "password"
     let loginButton = "loginbtn"
@@ -52,22 +50,18 @@ type Moodle (?arg : String) =
     let param_moodle_username = 
         match arg with 
             | None -> "tudeng"
-            | Some a -> a.ToLower() 
+            | Some a -> a.ToLower().Trim() 
 
     let param_fullname = 
         match arg with 
             | None -> "Tudeng Tudeng"
-            | Some a -> a + " " + a
+            | Some a -> a.Trim() + " " + a.Trim()
 
     let log (text : string) =
         System.Console.Error.WriteLine(text)
      
     
     static member val driver = null with get, set
-    //static member val param_moodle_username = "tudeng" with get, set
-    //static member val param_fullname = "Tudeng Tipikas" with get, set
-
-
 
     member this.Init () =
         options.AddAdditionalCapability(CapabilityType.Version, "latest", true)
@@ -78,19 +72,14 @@ type Moodle (?arg : String) =
         options.AddArgument("headless")
         options.AddArgument("disable-gpu")
 
-        Moodle.driver <- new ChromeDriver(options)
+        Moodle.driver <- new ChromeDriver("MoodleTest" + string (System.IO.Path.DirectorySeparatorChar), options)
         
         Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(3.0)
-        this.OpenMoodle() 
         if arg.IsSome then
-            if arg.ToString() = "Tudeng" then
+            let argValue = Option.get arg
+            if argValue = "Tudeng" then
                 this.SetXDebugcookie ()
-
-    
-    //member this.SetUsername(username : String) = 
-    //    Moodle.param_moodle_username <- username.ToLower()
-    //    Moodle.param_fullname <- username + " " + username
-    //    ()
+        this.OpenMoodle() 
 
     member this.SetXDebugcookie () = 
         Moodle.driver.Navigate().GoToUrl(COOKIE_SITE)
