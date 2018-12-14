@@ -74,7 +74,7 @@ type Moodle (?arg : String) =
 
         Moodle.driver <- new ChromeDriver("MoodleTest" + string (System.IO.Path.DirectorySeparatorChar), options)
         
-        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(3.0)
+        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(10.0)
         if arg.IsSome then
             let argValue = Option.get arg
             if argValue = "Tudeng" then
