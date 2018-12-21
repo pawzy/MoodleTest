@@ -74,12 +74,22 @@ type Moodle (?arg : String) =
 
         Moodle.driver <- new ChromeDriver("MoodleTest" + string (System.IO.Path.DirectorySeparatorChar), options)
         
-        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(10.0)
+        Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(5.0)
         if arg.IsSome then
             let argValue = Option.get arg
             if argValue = "Tudeng" then
                 this.SetXDebugcookie ()
         this.OpenMoodle() 
+
+    member this.SavePageSource () =
+        match Moodle.driver.Url.Contains(".php") with
+            | true -> let pageSource = Moodle.driver.PageSource
+                      File.WriteAllText ("Logs" + string (System.IO.Path.DirectorySeparatorChar) + "pagesource-" + System.DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".html", pageSource)
+                      
+            | _ -> ()
+        //let pageSource = Moodle.driver.PageSource
+        //File.WriteAllText ("Logs" + string (System.IO.Path.DirectorySeparatorChar) + "pagesource-" + System.DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".html", pageSource)
+                      
 
     member this.SetXDebugcookie () = 
         Moodle.driver.Navigate().GoToUrl(COOKIE_SITE)

@@ -35,6 +35,7 @@ type Stepper (?arg : String) =
             | s -> failwith (sprintf "Tundmatu toiming, %s" s)
         member this.Reset() = 
             System.Threading.Thread.Sleep(2000)
+            moodle.SavePageSource ()
             moodle.UnEnrol ()
             Moodle.driver.Quit()
             moodle.Init ()
