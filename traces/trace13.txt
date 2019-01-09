@@ -1,0 +1,29 @@
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 3715
+Only local connections are allowed.
+Added sort: MoodleModel.View
+Added sort: MoodleModel.User
+Added sort: MoodleModel.Password
+Added sort: MoodleModel.LoginStatus
+Added sort: MoodleModel.LogoutStatus
+Added sort: MoodleModel.SearchKey
+Added sort: MoodleModel.SearchStatus
+Added sort: MoodleModel.EnrolmentKey
+Added sort: MoodleModel.EnrolmentStatus
+Added sort: MoodleModel.Contract
+Added sort: MoodleModel.Factory
+Added sort: NModel.Sequence`1[T]
+Added sort: NModel.Terms.CompoundTerm
+Added sort: NModel.Sequence`1[NModel.Terms.CompoundTerm]
+Added sort: NModel.Map`2[T,S]
+Added sort: NModel.Map`2[MoodleModel.User,MoodleModel.LoginStatus]
+Added sort: NModel.Set`1[T]
+Added sort: NModel.Set`1[MoodleModel.User]
+Added sort: NModel.Map`2[MoodleModel.SearchKey,MoodleModel.SearchStatus]
+Added sort: NModel.Map`2[MoodleModel.User,MoodleModel.EnrolmentStatus]
+TestResult(0, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )

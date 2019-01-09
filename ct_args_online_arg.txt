@@ -6,7 +6,7 @@
 /iut:MoodleTest.Stepper.Create
 
 /metrics:+
-/runs:20
+/runs:30
 
 /stepperArg:Tudeng
 

@@ -1,10 +1,8 @@
 ﻿namespace MoodleModel
 
-open System
 open NModel
 open NModel.Attributes
 open NModel.Execution
-open NModel
 
 type View = Login = 0 | DashboardAuthenicated = 1 | Dashboard = 2 | CourseSearch = 3 | CourseEnrol = 4 | CourseOverview = 5 | Quiz = 6 | QuizResults = 7
 type User = Student = 0 
@@ -16,7 +14,15 @@ type SearchStatus = Found = 0 | Notfound = 1
 type EnrolmentKey = Correct = 0 | Incorrect = 1
 type EnrolmentStatus = Successful = 0 | Failed = 1
 
+type RequirementAttribute = 
+    class 
+        [<DefaultValue>] val Id : string;
+        [<DefaultValue>] val Summary : string;
+        new() = {}
+    end
+
 type Contract() = 
+
     static member val view = View.Login with get, set
 
     // login & logout 
@@ -33,6 +39,8 @@ type Contract() =
     // quiz
     static member val quizStarted = false with get, set
 
+    [<Requirement(Id = "Login start", Summary="The starting action for login. Takes two arguments: user (username) and password (correct or incorrect). 
+                                                The action is enabled when the current view is login screen and the current user is not logged in.")>]
     [<Action>]
     static member login_start (user : User, password : Password) = 
         Contract.view <- View.DashboardAuthenicated
@@ -40,34 +48,26 @@ type Contract() =
             Contract.activeLoginRequests <- Contract.activeLoginRequests.Add (user,LoginStatus.Success)
         else
             Contract.activeLoginRequests <- Contract.activeLoginRequests.Add (user,LoginStatus.Failure)
-            //Contract.view <- View.Login
     static member login_startEnabled (user : User) =
         Contract.view = View.Login && 
         Contract.usersLoggedIn.Contains(user) = false 
 
-
+    [<Requirement(Id = "Login finish", Summary="The finish action for login. Takes two arguments: user (username) and loginStatus (success or failure).
+                                                The action is enabled when login request has been started for the user and the view is authenticated
+                                                user dashboard")>]
     [<Action>]
     static member login_finish(user : User, loginStatus : LoginStatus) = 
         Contract.activeLoginRequests <- Contract.activeLoginRequests.RemoveKey(user)
-
         if loginStatus = LoginStatus.Success then 
             Contract.usersLoggedIn <- Contract.usersLoggedIn.Add(user)
         else 
-            //Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
             Contract.view <- View.Login
     static member login_finishEnabled(user : User, loginStatus : LoginStatus) = 
         Contract.activeLoginRequests.Contains(Pair<User, LoginStatus> (user, loginStatus)) && 
         Contract.view = View.DashboardAuthenicated
 
-    
-    //static member logout (user: User) = 
-    //    //()
-    //    Contract.usersLoggedIn <- Contract.usersLoggedIn.Remove(user)
-    //    Contract.view <- View.Dashboard
-    //static member logoutEnabled (user: User) =
-    //    Contract.usersLoggedIn.Contains(user) && 
-    //    Contract.currentSearch.Count = 0 &&
-    //    Contract.activeEnrolRequests.Count = 0
+    [<Requirement(Id = "Logout start", Summary="The starting action for logout. Takes one argument: user (username). 
+                                                The action is enabled when the user is currently logged in and there are no ongoing other actions")>]    
     [<Action>]
     static member logout_start (user : User) = 
         Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Add(user)
@@ -76,10 +76,12 @@ type Contract() =
     static member logout_startEnabled (user : User) = 
         Contract.usersLoggedIn.Contains(user)  &&
         Contract.currentSearch.Count = 0 &&
-        Contract.activeEnrolRequests.Count = 0 &
+        Contract.activeEnrolRequests.Count = 0 &&
         Contract.quizStarted = false
 
-
+    [<Requirement(Id = "Logout finish", Summary="The finish action for logout. Takes one arguments: user (username). 
+                                                The action is enabled when the current view is dashboard, the user is not logged in 
+                                                and there is a logout request for the specified user")>]
     [<Action>]
     static member logout_finish (user : User) =
         Contract.activeLogoutRequests <- Contract.activeLogoutRequests.Remove(user)
@@ -88,7 +90,9 @@ type Contract() =
         Contract.usersLoggedIn.Contains(user) = false &&
         Contract.activeLogoutRequests.Contains(user)
         
-
+    [<Requirement(Id = "Search start", Summary="The starting action for search. Takes on argument: keyword (valid or invalid).
+                                                The action is enabled when user is logged in, there are no ongoing searches and the view 
+                                                is either home page or course search page.")>]
     [<Action>]
     static member search_start (keyword : SearchKey) =
         Contract.view <- View.CourseSearch
@@ -102,7 +106,9 @@ type Contract() =
         Contract.currentSearch.Count = 0 &&
         (Contract.view = View.DashboardAuthenicated ||
          Contract.view = View.CourseSearch)
-    
+ 
+    [<Requirement(Id = "Search finish", Summary="The finish action for search. Takes two arguments: keyword (valid or invalid) and status (found or not found).
+                                                The action is enabled when the view is course search view and search has been started.")>]   
     [<Action>]
     static member search_finish (keyword : SearchKey, status : SearchStatus) =
         Contract.currentSearch <- Contract.currentSearch.RemoveKey(keyword)
@@ -113,17 +119,17 @@ type Contract() =
     static member search_finishEnabled (keyword : SearchKey, status : SearchStatus) =
         Contract.currentSearch.Contains(Pair<SearchKey, SearchStatus> (keyword, status)) &&
         Contract.view = View.CourseSearch
-
+    
+    [<Requirement(Id = "Enrol start", Summary="The start action for enrol. Takes two arguments: user (username) and enrolmentKey (corract or incorrect).
+                                               The action is enabled when the user is logged in, course search was successful and the user is not enroled to the course.")>]   
     [<Action>]
     static member enrol_start (user : User, enrolmentKey : EnrolmentKey) = 
         Contract.view <- View.CourseEnrol
-        //Contract.enrolStarted <- true
         if enrolmentKey = EnrolmentKey.Correct then 
             Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Successful)
         else 
             Contract.activeEnrolRequests <- Contract.activeEnrolRequests.Add(user, EnrolmentStatus.Failed)
-        //()
-        
+
     static member enrol_startEnabled (user : User) =
         Contract.usersLoggedIn.Contains(user) &&
         Contract.foundCourse = true &&
@@ -132,7 +138,8 @@ type Contract() =
         Contract.enrolStarted = false &&
         Contract.activeEnrolRequests.ContainsKey(user) = false
         
-
+    [<Requirement(Id = "Enrol finish", Summary="The finish action for enrol. Takes two arguments: user (username) and enrolmentStatus (success or failure).
+                                                The action is enabled when enrol request has been started and the current view is enrolment view.")>]   
     [<Action>]
     static member enrol_finish (user : User, enrolmentStatus : EnrolmentStatus) =
         Contract.activeEnrolRequests <- Contract.activeEnrolRequests.RemoveKey(user)
@@ -145,7 +152,9 @@ type Contract() =
     static member enrol_finishEnabled (user : User, enrolmentStatus : EnrolmentStatus) = 
         Contract.activeEnrolRequests.Contains(Pair<User, EnrolmentStatus> (user, enrolmentStatus)) &&
         Contract.view = View.CourseEnrol 
-        
+    
+    [<Requirement(Id = "Quiz start", Summary="The start action for quiz. Takes one argument: user (username). 
+                                             The action is enabled when the user is enrolled to the course, the view is course dashboard and quiz has not been started.")>]   
     [<Action>]
     static member quiz_start (user : User) = 
         Contract.view <- View.Quiz
@@ -154,6 +163,9 @@ type Contract() =
         Contract.courseParticipants.Contains(user) &&
         Contract.view = View.CourseOverview &&
         Contract.quizStarted = false
+    
+    [<Requirement(Id = "Quiz finish", Summary="The start action for quiz. 
+                                             The action is enabled when a quiz has been started and the current view is quiz view.")>]   
     [<Action>]
     static member quiz_finish () = 
         Contract.view <- View.QuizResults

@@ -18,7 +18,6 @@ type Stepper (?arg : String) =
         new Stepper ()
     
     static member Create(arg) =
-        //System.Console.Out(arg)
         System.Console.WriteLine(arg : String) |> ignore
         new Stepper (arg)
                 

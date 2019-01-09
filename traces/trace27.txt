@@ -1,0 +1,196 @@
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 30815
+Only local connections are allowed.
+Added sort: MoodleModel.View
+Added sort: MoodleModel.User
+Added sort: MoodleModel.Password
+Added sort: MoodleModel.LoginStatus
+Added sort: MoodleModel.LogoutStatus
+Added sort: MoodleModel.SearchKey
+Added sort: MoodleModel.SearchStatus
+Added sort: MoodleModel.EnrolmentKey
+Added sort: MoodleModel.EnrolmentStatus
+Added sort: MoodleModel.Contract
+Added sort: MoodleModel.Factory
+Added sort: NModel.Sequence`1[T]
+Added sort: NModel.Terms.CompoundTerm
+Added sort: NModel.Sequence`1[NModel.Terms.CompoundTerm]
+Added sort: NModel.Map`2[T,S]
+Added sort: NModel.Map`2[MoodleModel.User,MoodleModel.LoginStatus]
+Added sort: NModel.Set`1[T]
+Added sort: NModel.Set`1[MoodleModel.User]
+Added sort: NModel.Map`2[MoodleModel.SearchKey,MoodleModel.SearchStatus]
+Added sort: NModel.Map`2[MoodleModel.User,MoodleModel.EnrolmentStatus]
+TestResult(0, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 30933
+Only local connections are allowed.
+TestResult(1, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 30997
+Only local connections are allowed.
+TestResult(2, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31070
+Only local connections are allowed.
+TestResult(3, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        enrol_start(User("Student"), EnrolmentKey("Incorrect")),
+        enrol_finish(User("Student"), EnrolmentStatus("Failed")),
+        enrol_start(User("Student"), EnrolmentKey("Incorrect")),
+        enrol_finish(User("Student"), EnrolmentStatus("Failed")),
+        enrol_start(User("Student"), EnrolmentKey("Incorrect")),
+        enrol_finish(User("Student"), EnrolmentStatus("Failed")),
+        enrol_start(User("Student"), EnrolmentKey("Incorrect")),
+        enrol_finish(User("Student"), EnrolmentStatus("Failed")),
+        enrol_start(User("Student"), EnrolmentKey("Correct")),
+        enrol_finish(User("Student"), EnrolmentStatus("Successful")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31261
+Only local connections are allowed.
+TestResult(4, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        search_start(SearchKey("InvalidCourse")),
+        search_finish(SearchKey("InvalidCourse"), SearchStatus("Notfound")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31403
+Only local connections are allowed.
+TestResult(5, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31474
+Only local connections are allowed.
+TestResult(6, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        enrol_start(User("Student"), EnrolmentKey("Correct")),
+        enrol_finish(User("Student"), EnrolmentStatus("Successful")),
+        quiz_start(User("Student")),
+        quiz_finish(),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31616
+Only local connections are allowed.
+TestResult(7, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        enrol_start(User("Student"), EnrolmentKey("Incorrect")),
+        enrol_finish(User("Student"), EnrolmentStatus("Failed")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31737
+Only local connections are allowed.
+TestResult(8, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("InvalidCourse")),
+        search_finish(SearchKey("InvalidCourse"), SearchStatus("Notfound")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31828
+Only local connections are allowed.
+TestResult(9, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31896
+Only local connections are allowed.
+TestResult(10, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        search_start(SearchKey("ValidCourse")),
+        search_finish(SearchKey("ValidCourse"), SearchStatus("Found")),
+        enrol_start(User("Student"), EnrolmentKey("Correct")),
+        enrol_finish(User("Student"), EnrolmentStatus("Successful")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 31994
+Only local connections are allowed.
+TestResult(11, Verdict("Success"), "",
+    Trace(
+        login_start(User("Student"), Password("Incorrect")),
+        login_finish(User("Student"), LoginStatus("Failure")),
+        login_start(User("Student"), Password("Correct")),
+        login_finish(User("Student"), LoginStatus("Success")),
+        search_start(SearchKey("InvalidCourse")),
+        search_finish(SearchKey("InvalidCourse"), SearchStatus("Notfound")),
+        logout_start(User("Student")),
+        logout_finish(User("Student"))
+    )
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 32097
+Only local connections are allowed.

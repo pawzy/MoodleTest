@@ -5,18 +5,13 @@ open System.IO
 open OpenQA.Selenium
 open OpenQA.Selenium.Remote
 open OpenQA.Selenium.Chrome
-open OpenQA.Selenium.Interactions
-open NModel
-open NModel.Conformance
 open NModel.Terms
 open MoodleModel
-open OpenQA.Selenium.Internal
 
 type Moodle (?arg : String) =
     let MOODLE_SITE = "http://localhost:8081/moodle/login/index.php"
     let COOKIE_SITE = "http://localhost:8081/moodle/xdebugcookie.php"
     let COURSE_ADMIN_SITE = "http://localhost:8081/moodle/user/index.php?contextid=28&id=2&perpage=200"
-    let MOODLE_USERNAME = "tudeng"
     let MOODLE_USERNAME_ADMIN = "admin"
     let MOODLE_PASSWORD_ADMIN = "05cT8eEe#"
     let MOODLE_PASSWORD_CORRECT = "AjutineParool1#"
@@ -25,7 +20,6 @@ type Moodle (?arg : String) =
     let MOODLE_SEARCH_INVALID = "Invalid"
     let MOODLE_ENROLMENT_KEY_VALID = "TK1"
     let MOODLE_ENROLMENT_KEY_INVALID = "Invalid"
-    let MOODLE_USER_FULLNAME = "Tudeng Tipikas"
 
     let username = "username"
     let password = "password"
@@ -40,8 +34,6 @@ type Moodle (?arg : String) =
     let selectCourse = "//div[contains(@class,'coursebox')]/div/h3/a"
     let enrolButton = "id_submitbutton"
     let courseActivity = "activity"
-    //let quizLink = "//li[@id='module-5']//div//div/a"
-    let quizLink = "activityinstance"
     let quizButton = "quizstartbuttondiv"
 
 
@@ -64,21 +56,23 @@ type Moodle (?arg : String) =
     static member val driver = null with get, set
 
     member this.Init () =
+        // set the chrome version to latest
         options.AddAdditionalCapability(CapabilityType.Version, "latest", true)
-        options.AddAdditionalCapability(CapabilityType.Platform, "WIN8", true);
-        options.AddAdditionalCapability("key", "key", true);
-        options.AddAdditionalCapability("secret", "secret", true);
-        options.AddAdditionalCapability("name", "katsetus", true);
+        // set the operating system
+        options.AddAdditionalCapability(CapabilityType.Platform, "WIN8", true)
+        // run chrome driver without graphical ui and disable gpu
         options.AddArgument("headless")
         options.AddArgument("disable-gpu")
-
+        // path to chrome driver  
         Moodle.driver <- new ChromeDriver("MoodleTest" + string (System.IO.Path.DirectorySeparatorChar), options)
-        
+        //time to wait for elements to appear 
         Moodle.driver.Manage().Timeouts().ImplicitWait <- TimeSpan.FromSeconds(5.0)
+        // check if argument given to adapter is "Tudeng" - if yes, then init XDebug
         if arg.IsSome then
             let argValue = Option.get arg
             if argValue = "Tudeng" then
                 this.SetXDebugcookie ()
+        // open moodle home page
         this.OpenMoodle() 
 
     member this.SavePageSource () =
@@ -86,32 +80,32 @@ type Moodle (?arg : String) =
             | true -> let pageSource = Moodle.driver.PageSource
                       File.WriteAllText ("Logs" + string (System.IO.Path.DirectorySeparatorChar) + "pagesource-" + System.DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".html", pageSource)
                       
-            | _ -> ()
-        //let pageSource = Moodle.driver.PageSource
-        //File.WriteAllText ("Logs" + string (System.IO.Path.DirectorySeparatorChar) + "pagesource-" + System.DateTime.UtcNow.ToString("yyyyMMddHHmmss") + ".html", pageSource)
-                      
+            | _ -> ()                      
 
     member this.SetXDebugcookie () = 
         Moodle.driver.Navigate().GoToUrl(COOKIE_SITE)
+        System.Threading.Thread.Sleep(2000)
 
     member this.OpenMoodle () =
         Moodle.driver.Navigate().GoToUrl(MOODLE_SITE)
         
     member this.Login (t:CompoundTerm) = 
+        // Find the input fields and login button in web page
         let usernameField = Moodle.driver.FindElementById(username)
         let passwordField = Moodle.driver.FindElementById(password)
         let loginButton = Moodle.driver.FindElementById(loginButton)
-   
+        // Insert username
         usernameField.SendKeys(param_moodle_username)
-
+        // Check whether the password to insert should be correct or incorrect
         if (string((t).[1]) = "Password(\"Correct\")") then 
             passwordField.SendKeys(MOODLE_PASSWORD_CORRECT)
         else 
             passwordField.SendKeys(MOODLE_PASSWORD_INCORRECT)        
-        
+        // Submit the input field values
         loginButton.Submit()
+        // Validate login
         let visibleElementWhenLoginSuccess = Moodle.driver.FindElementsById(itemVisibleWhenLoginSuccess)
-            
+        // Create a compound term to return
         if visibleElementWhenLoginSuccess.Count > 0 then
             Action.Create("login_finish", (t).[0], LoginStatus.Success) :> CompoundTerm
         else 
@@ -207,20 +201,22 @@ type Moodle (?arg : String) =
         loginButton.Submit()
     
     member this.UnEnrol () = 
+        // see if user is currently still logged in. If yes then log the user out
         let elementVisibleWhenUserLoggedIn = Moodle.driver.FindElementsById(itemVisibleWhenLoginSuccess)
         if elementVisibleWhenUserLoggedIn.Count > 0 then
-            this.LogoutHelper ()
-
+            this.LogoutHelper ()       
+        // Log in as admin 
         this.LoginAsAdmin ()
+        // Go to course admin page
         Moodle.driver.Navigate().GoToUrl(COURSE_ADMIN_SITE)
         let unenrolUser = Moodle.driver.FindElementsByXPath("//div[@data-fullname='" + param_fullname + "']/a[@data-action='unenrol']")
+        // Unenrol current user
         if unenrolUser.Count > 0 then
             unenrolUser.Item(0).Click()            
             System.Threading.Thread.Sleep(2000)
             let submit = Moodle.driver.FindElementByXPath("//div[@class='modal-content']/div[@class='modal-footer']/button[1]")
             submit.Click()
             System.Threading.Thread.Sleep(2000)
-
         ()
 
 

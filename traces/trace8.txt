@@ -1,0 +1,2 @@
+Starting ChromeDriver 2.42.591088 (7b2b2dca23cca0862f674758c9a3933e685c27d5) on port 60306
+Only local connections are allowed.
